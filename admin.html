@@ -43,7 +43,7 @@
 
         async function fetchSOSData() {
             try {
-                let response = await fetch("http://localhost:5000/get_sos");
+                let response = await fetch("https://boit.onrender.com/get_sos");
                 let sosData = await response.json();
 
                 sosData.forEach(data => addAnimatedMarker(data));
@@ -85,6 +85,5 @@
         fetchSOSData();
         setInterval(fetchSOSData, 10000);
     </script>
-    
 </body>
 </html>
