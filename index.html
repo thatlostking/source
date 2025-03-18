@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User SOS & Crime Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex flex-col items-center p-6 bg-gray-900 text-white">
+    <h1 class="text-3xl font-bold text-center mb-4">🚨 SOS & Crime Reporting</h1>
+    
+    <button id="sosBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg mb-4">🚨 Ask for Help</button>
+
+    <textarea id="crimeReport" placeholder="Describe the crime..." class="p-2 w-80 h-32 text-black rounded-md mb-2"></textarea>
+    <button id="reportCrimeBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">📢 Report Crime</button>
+
+    <script>
+        async function getIP() {
+            try {
+                let response = await fetch("https://api64.ipify.org?format=json");
+                let data = await response.json();
+                return data.ip;
+            } catch (error) {
+                console.error("Error fetching IP:", error);
+                return "Unknown IP";
+            }
+        }
+
+        function getLocationAndSendData(type) {
+            if (!navigator.geolocation) {
+                alert("❌ Geolocation not supported.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                let lat = position.coords.latitude;
+                let lng = position.coords.longitude;
+                let ip = await getIP();
+                let phone = prompt("📞 Enter your phone number:");
+
+                if (!phone) return alert("❌ Phone number is required!");
+
+                let payload = { lat, lng, phone, ip };
+
+                if (type === "crime") {
+                    let description = document.getElementById("crimeReport").value;
+                    if (!description) return alert("❌ Please enter a crime description.");
+                    payload.description = description;
+                }
+
+                fetch("https://boit.onrender.com/sos", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") alert("✅ Report Sent!");
+                    else alert("❌ Failed to send report.");
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alert("❌ Error sending request! Check console.");
+                });
+
+            }, () => alert("❌ Failed to get location!"));
+        }
+
+        document.getElementById("sosBtn").addEventListener("click", () => getLocationAndSendData("sos"));
+        document.getElementById("reportCrimeBtn").addEventListener("click", () => getLocationAndSendData("crime"));
+    </script>
+</body>
+</html>
